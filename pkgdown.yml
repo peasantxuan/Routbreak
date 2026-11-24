@@ -1,0 +1,13 @@
+pandoc: 3.8.3
+pkgdown: 2.2.1
+pkgdown_sha: ~
+articles:
+  about: about.html
+  estimating-rob: estimating-rob.html
+  getting-started: getting-started.html
+  negative-binomial: negative-binomial.html
+  routbreak-practical-tutorial: routbreak-practical-tutorial.html
+last_built: 2026-11-24T18:33Z
+urls:
+  reference: https://peasantxuan.github.io/Routbreak/reference
+  article: https://peasantxuan.github.io/Routbreak/articles

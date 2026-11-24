@@ -1,0 +1,248 @@
+# Routbreak
+
+[![R-CMD-check](https://github.com/peasantxuan/Routbreak/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/peasantxuan/Routbreak/actions/workflows/R-CMD-check.yaml)
+[![Documentation](https://img.shields.io/badge/docs-pkgdown-087a8c.svg)](https://peasantxuan.github.io/Routbreak/)
+
+Routbreak provides tools to quantify epidemic emergence risk in
+structured populations using multitype branching processes. `R_ref`
+describes the global reproduction threshold, whereas outbreak
+probability and `R_ob` depend on the population group in which infection
+is introduced.
+
+The package supports Poisson and independent-edge negative-binomial
+offspring models, matrix diagnostics, and independent-entry
+Poisson–Gamma inference from early transmission data.
+
+## Installation
+
+Routbreak is not yet available from CRAN. Install the development
+release from GitHub with:
+
+``` r
+
+install.packages("remotes")
+remotes::install_github("peasantxuan/Routbreak")
+```
+
+## First analysis
+
+Rows of `R` are infection destinations and columns are infection
+sources.
+
+``` r
+
+library(Routbreak)
+
+R <- matrix(
+  c(
+    0.95, 0.12, 0.05,
+    0.35, 0.85, 0.12,
+    0.12, 0.25, 1.05
+  ),
+  nrow = 3,
+  byrow = TRUE
+)
+
+dimnames(R) <- list(
+  c("North", "Central", "Coast"),
+  c("North", "Central", "Coast")
+)
+
+rob_table(R)
+```
+
+The returned table contains community-specific outbreak probabilities,
+outbreak reproduction ratios (`R_ob`), local and total reproduction
+ratios, and the common reference reproduction ratio (`R_ref`).
+
+## Main functions
+
+| Task | Functions |
+|----|----|
+| Summarize epidemic risk | [`rob_table()`](https://peasantxuan.github.io/Routbreak/reference/rob_table.md) |
+| Calculate individual quantities | [`outbreak_prob()`](https://peasantxuan.github.io/Routbreak/reference/outbreak_prob.md), [`r_ob()`](https://peasantxuan.github.io/Routbreak/reference/r_ob.md), [`r_ref()`](https://peasantxuan.github.io/Routbreak/reference/r_ref.md), [`r_local()`](https://peasantxuan.github.io/Routbreak/reference/r_local.md), [`r_total()`](https://peasantxuan.github.io/Routbreak/reference/r_total.md) |
+| Import and inspect matrices | [`as_rmatrix()`](https://peasantxuan.github.io/Routbreak/reference/as_rmatrix.md), [`is_irreducible()`](https://peasantxuan.github.io/Routbreak/reference/is_irreducible.md), [`matrix_diagnostics()`](https://peasantxuan.github.io/Routbreak/reference/matrix_diagnostics.md) |
+| Scale or construct matrices | [`scale_to_rref()`](https://peasantxuan.github.io/Routbreak/reference/scale_to_rref.md), [`colocation_to_r()`](https://peasantxuan.github.io/Routbreak/reference/colocation_to_r.md) |
+| Estimate a matrix | [`infer_R()`](https://peasantxuan.github.io/Routbreak/reference/infer_R.md), [`infer_R_sufficient()`](https://peasantxuan.github.io/Routbreak/reference/infer_R_sufficient.md) |
+| Propagate posterior uncertainty | [`estimate_rob()`](https://peasantxuan.github.io/Routbreak/reference/estimate_rob.md) |
+
+For independent-edge negative-binomial offspring, supply
+`offspring = "nb"` and the overdispersion parameter `omega`:
+
+``` r
+
+rob_table(R, offspring = "nb", omega = 0.7)
+```
+
+## Estimation requires an explicit prior
+
+The Poisson–Gamma inference module estimates directed matrix entries
+from generation-resolved transmission links or sufficient statistics.
+Users must provide proper Gamma shape and rate parameters. A universal
+per-edge prior is not supplied because its implied prior for total
+reproduction changes with the number of communities.
+
+``` r
+
+transmissions <- data.frame(
+  generation = rep(1L, 4),
+  source = c("A", "B", "A", "B"),
+  destination = c("A", "A", "B", "B"),
+  transmissions = c(12L, 4L, 3L, 16L)
+)
+
+fit <- infer_R(
+  transmissions,
+  initial_cases = c(A = 10, B = 20),
+  prior_shape = 1,
+  prior_rate = 1.6
+)
+fit$mle
+```
+
+Scalar priors apply to every non-structural edge; matrices allow
+edge-specific elicitation. The inference tutorial demonstrates how to
+start from a prior on each source’s total reproduction and allocate it
+across destinations.
+
+## Documentation
+
+Start with:
+
+- [Getting started with
+  Routbreak](https://peasantxuan.github.io/Routbreak/articles/getting-started.html)
+- [Function
+  reference](https://peasantxuan.github.io/Routbreak/reference/)
+- [Practical
+  tutorial](https://peasantxuan.github.io/Routbreak/articles/routbreak-practical-tutorial.html),
+  including an age-structured Italian POLYMOD application through
+  `socialmixr`
+
+Advanced tutorials:
+
+- [Overdispersed offspring
+  distributions](https://peasantxuan.github.io/Routbreak/articles/negative-binomial.html)
+- [Estimating outbreak reproduction ratios from early transmission
+  data](https://peasantxuan.github.io/Routbreak/articles/estimating-rob.html)
+
+The practical tutorial uses `socialmixr`’s Italian POLYMOD survey
+interface to estimate a 17-age-group mean contact matrix. Under an
+explicitly illustrative uniform per-contact transmission assumption, it
+transposes that matrix to Routbreak’s destination-row/source-column
+convention and normalizes it to `R_ref = 1.5`. The resulting
+reproduction matrix is a teaching scenario, not a directly observed
+estimate for an Italian epidemic. Routbreak does not copy or
+redistribute the POLYMOD records or the derived matrix; the website
+builds the example through the suggested CRAN package `socialmixr`. The
+underlying POLYMOD dataset is version 1.1, DOI 10.5281/zenodo.1157934,
+licensed CC BY-NC 4.0.
+
+## Assumptions and unsupported regimes
+
+Routbreak uses a fixed nonnegative reproduction matrix during the
+stochastic early phase. Outbreak probability is the probability of
+non-extinction, not a final attack rate.
+
+Poisson
+[`r_ob()`](https://peasantxuan.github.io/Routbreak/reference/r_ob.md)
+supports supercritical irreducible matrices, primitive irreducible
+matrices at or below threshold through the published continuation, and
+diagonal matrices representing independent communities. General
+reducible non-diagonal matrices and periodic continuation cases are
+reported rather than assigned an invented value. Negative-binomial
+[`r_ob()`](https://peasantxuan.github.io/Routbreak/reference/r_ob.md)
+requires positive outbreak probabilities because the paper does not
+derive its zero-probability continuation.
+
+Matrix inference uses an independent-entry Poisson likelihood with
+proper Gamma priors. It is not a negative-binomial likelihood or a
+structured model that fixes a normalized mixing matrix and estimates
+only a scalar multiplier.
+
+## Citation
+
+The scientific framework is described in:
+
+> Wang B, Valdano E (2026). Redefining and estimating the early-phase
+> reproduction ratio for epidemic outbreaks in spatially structured
+> populations. *PLOS Computational Biology*, 22(7), e1014425.
+> <https://doi.org/10.1371/journal.pcbi.1014425>
+
+Use `citation("Routbreak")` for the separate package and paper
+citations. Routbreak does not currently have a software DOI.
+
+## License
+
+Routbreak is distributed under the MIT License. The software license
+does not grant permission to redistribute third-party research data. The
+public repository contains no Italian or Canadian research dataset.
+
+# Package index
+
+## Core outbreak metrics
+
+Introduction-specific early-epidemic risk.
+
+- [`outbreak_prob()`](https://peasantxuan.github.io/Routbreak/reference/outbreak_prob.md)
+  : Outbreak probabilities for a spatial branching process
+- [`r_ob()`](https://peasantxuan.github.io/Routbreak/reference/r_ob.md)
+  : Outbreak reproduction ratio
+- [`r_ref()`](https://peasantxuan.github.io/Routbreak/reference/r_ref.md)
+  : Reference reproduction ratio
+- [`r_local()`](https://peasantxuan.github.io/Routbreak/reference/r_local.md)
+  : Local reproduction ratios
+- [`r_total()`](https://peasantxuan.github.io/Routbreak/reference/r_total.md)
+  : Total reproduction ratios
+- [`rob_table()`](https://peasantxuan.github.io/Routbreak/reference/rob_table.md)
+  : Summarize outbreak risk by community
+
+## Matrix utilities
+
+Prepare, scale, and diagnose reproduction matrices.
+
+- [`scale_to_rref()`](https://peasantxuan.github.io/Routbreak/reference/scale_to_rref.md)
+  : Scale a reproduction matrix to a target reference ratio
+- [`colocation_to_r()`](https://peasantxuan.github.io/Routbreak/reference/colocation_to_r.md)
+  : Construct a reproduction matrix from colocation data
+- [`as_rmatrix()`](https://peasantxuan.github.io/Routbreak/reference/as_rmatrix.md)
+  : Convert directed long-format data to a reproduction matrix
+- [`is_irreducible()`](https://peasantxuan.github.io/Routbreak/reference/is_irreducible.md)
+  : Test whether a reproduction matrix is irreducible
+- [`matrix_diagnostics()`](https://peasantxuan.github.io/Routbreak/reference/matrix_diagnostics.md)
+  : Diagnose connected components and periodicity
+
+## Statistical inference
+
+Estimate reproduction matrices and propagate posterior uncertainty.
+
+- [`infer_R()`](https://peasantxuan.github.io/Routbreak/reference/infer_R.md)
+  : Infer a reproduction matrix from generation-resolved transmission
+  data
+- [`infer_R_sufficient()`](https://peasantxuan.github.io/Routbreak/reference/infer_R_sufficient.md)
+  : Infer a reproduction matrix from sufficient statistics
+- [`estimate_rob()`](https://peasantxuan.github.io/Routbreak/reference/estimate_rob.md)
+  : Propagate reproduction-matrix uncertainty to outbreak risk
+
+# Articles
+
+### Getting started
+
+- [Getting started with
+  Routbreak](https://peasantxuan.github.io/Routbreak/articles/getting-started.md):
+
+### Advanced
+
+- [Overdispersed offspring
+  distributions](https://peasantxuan.github.io/Routbreak/articles/negative-binomial.md):
+- [Estimating outbreak reproduction ratios from early transmission
+  data](https://peasantxuan.github.io/Routbreak/articles/estimating-rob.md):
+
+### Applications
+
+- [Routbreak: A practical tutorial on outbreak risk in connected
+  populations](https://peasantxuan.github.io/Routbreak/articles/routbreak-practical-tutorial.md):
+
+### About
+
+- [About
+  Routbreak](https://peasantxuan.github.io/Routbreak/articles/about.md):
