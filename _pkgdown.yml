@@ -1,0 +1,94 @@
+title: Routbreak
+url: https://peasantxuan.github.io/Routbreak/
+description: >
+  Outbreak reproduction ratios in spatially structured populations
+
+template:
+  bootstrap: 5
+  bootswatch: flatly
+  light-switch: true
+  bslib:
+    primary: "#087a8c"
+    link-color: "#086f83"
+    border-radius: 0.4rem
+  includes:
+    in_header: |
+      <meta name="theme-color" content="#087a8c">
+
+home:
+  title: Routbreak | Epidemic emergence risk in structured populations
+  description: >
+    Quantify outbreak probability and outbreak reproduction ratios with
+    multitype branching-process models.
+
+navbar:
+  structure:
+    left: [get_started, reference, articles, news, about]
+    right: [search, github]
+  components:
+    get_started:
+      text: Get started
+      href: articles/getting-started.html
+    articles:
+      text: Articles
+      menu:
+      - text: Advanced
+      - text: Overdispersed offspring distributions
+        href: articles/negative-binomial.html
+      - text: Estimating outbreak reproduction ratios
+        href: articles/estimating-rob.html
+      - text: Applications
+      - text: Practical tutorial with Italian POLYMOD contacts
+        href: articles/routbreak-practical-tutorial.html
+    about:
+      text: About
+      href: articles/about.html
+    github:
+      icon: fab fa-github
+      aria-label: GitHub repository
+      href: https://github.com/peasantxuan/Routbreak
+
+articles:
+- title: Getting started
+  contents:
+  - getting-started
+- title: Advanced
+  contents:
+  - negative-binomial
+  - estimating-rob
+- title: Applications
+  contents:
+  - routbreak-practical-tutorial
+- title: About
+  contents:
+  - about
+
+reference:
+- title: Core outbreak metrics
+  desc: Introduction-specific early-epidemic risk.
+  contents:
+  - outbreak_prob
+  - r_ob
+  - r_ref
+  - r_local
+  - r_total
+  - rob_table
+- title: Matrix utilities
+  desc: Prepare, scale, and diagnose reproduction matrices.
+  contents:
+  - scale_to_rref
+  - colocation_to_r
+  - as_rmatrix
+  - is_irreducible
+  - matrix_diagnostics
+- title: Statistical inference
+  desc: Estimate reproduction matrices and propagate posterior uncertainty.
+  contents:
+  - infer_R
+  - infer_R_sufficient
+  - estimate_rob
+
+footer:
+  structure:
+    left: developed_by
+    right: built_with

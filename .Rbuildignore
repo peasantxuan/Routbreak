@@ -1,0 +1,8 @@
+^LICENSE\.md$
+^_pkgdown\.yml$
+^pkgdown$
+^docs$
+^tmp$
+^\.github$
+^vignettes/routbreak-practical-tutorial\.Rmd$
+^vignettes/about\.Rmd$

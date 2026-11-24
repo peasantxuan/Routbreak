@@ -1,0 +1,39 @@
+Package: Routbreak
+Title: Outbreak Reproduction Ratios in Spatially Structured Populations
+Version: 0.3.0
+Authors@R: c(
+    person("Boxuan", "Wang", email = "wangboxuan990617@gmail.com",
+           role = c("aut", "cre")),
+    person("Eugenio", "Valdano", role = "ctb")
+  )
+Description: Computes outbreak probabilities and outbreak reproduction ratios
+    for multitype Poisson and independent-edge negative-binomial branching
+    processes. The implementation follows
+    Wang and Valdano (2026) <doi:10.1371/journal.pcbi.1014425>, using a
+    reproduction matrix whose rows are infection destinations and whose
+    columns are infection sources. It estimates reproduction matrices from
+    generation-resolved transmission counts or sufficient statistics under a
+    Gamma-Poisson model, and propagates posterior uncertainty to outbreak
+    quantities. It also provides reference, local, and total reproduction
+    ratios and constructs reproduction matrices from colocation data.
+License: MIT + file LICENSE
+URL: https://peasantxuan.github.io/Routbreak/,
+    https://github.com/peasantxuan/Routbreak
+BugReports: https://github.com/peasantxuan/Routbreak/issues
+Depends:
+    R (>= 3.2.0)
+Encoding: UTF-8
+Language: en-US
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.2
+Suggests:
+    knitr,
+    rmarkdown,
+    socialmixr,
+    spelling,
+    testthat (>= 3.0.0)
+VignetteBuilder: knitr
+Config/testthat/edition: 3
+Config/Needs/website:
+    pkgdown,
+    socialmixr
